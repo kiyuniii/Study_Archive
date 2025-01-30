@@ -69,6 +69,7 @@ void LED_R_Task(void const * argument);
 void LED_Y_Task(void const * argument);
 void LED_G_Task(void const * argument);
 void LCD_Task(void const * argument);
+void LCD_Init(void);
 
 /* USER CODE BEGIN PFP */
 //KIYUN: UART CONSOLE DEBUG
@@ -136,13 +137,9 @@ int main(void)
   MX_DMA_Init();
   MX_SPI1_Init();
   MX_USART2_UART_Init();
+  LCD_Init();
   /* USER CODE BEGIN 2 */
-  //KIYUN: 1초마다 재생 -> 이거하면 아래의 RTOS 하나도 안 됨
-//  while (1)
-//   {
-//       UART_SendString("THIS IS A TEXT FROM HAL_LIBRARY\r\n");
-//       HAL_Delay(1000);
-//   }
+
   /* USER CODE END 2 */
 
   /* USER CODE BEGIN RTOS_MUTEX */
@@ -405,7 +402,15 @@ static void MX_GPIO_Init(void)
 }
 
 /* USER CODE BEGIN 4 */
-
+void LCD_Init(void) {
+	ILI9341_Init();
+	ILI9341_SetRotation(SCREEN_HORIZONTAL_1);
+	ILI9341_FillScreen(WHITE);	//FOR INITIALIZE
+	ILI9341_SetRotation(SCREEN_HORIZONTAL_1);
+	ILI9341_FillScreen(BLACK);	//FOR INITIALIZE
+	ILI9341_SetRotation(SCREEN_HORIZONTAL_2);
+	ILI9341_FillScreen(BLACK);	//FOR INITIALIZE
+}
 /* USER CODE END 4 */
 
 /* USER CODE BEGIN Header_LED_R_Task */
@@ -424,16 +429,14 @@ void LED_R_Task(void const * argument)
 	    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, SET);
 	    UART_SendString("LED_R _ON\r\n");
 
-	    for (int i = 0; i < 10; i++)  // 50ms 단위로 끊어서 실행
-	    {
+	    for (int i = 0; i < 10; i++) {
 	        osDelay(3);
-	    }
+	     }
 
 	    HAL_GPIO_WritePin(GPIOA, GPIO_PIN_9, RESET);
 	    UART_SendString("LED_R OFF\r\n");
 
-	    for (int i = 0; i < 10; i++)  // 50ms 단위로 끊어서 실행
-	    {
+	    for (int i = 0; i < 10; i++) {
 	        osDelay(7);
 	    }
   }
@@ -514,10 +517,6 @@ void LED_G_Task(void const * argument)
 void LCD_Task(void const * argument)
 {
   /* USER CODE BEGIN LCD_Task */
-	ILI9341_Init();
-	ILI9341_SetRotation(SCREEN_HORIZONTAL_1);
-//	ILI9341_FillScreen(BLACK);	//FOR INITIALIZE
-
 	static char BufferNum[30];
 	ILI9341_DrawText("HELLO, WORLD!", FONT3, 10, 110, WHITE, BLACK);
 	ILI9341_DrawText("MY NAME IS KIYUN!", FONT3, 10, 130, WHITE, BLACK);
@@ -534,15 +533,6 @@ void LCD_Task(void const * argument)
 	      osDelay(5);
 	    }
 	}
-//	//카운트 출력
-//	for (uint8_t i = 0; i <= 5; i++)
-//	{
-//		sprintf(BufferText, "COUNT : %d", i);
-//		ILI9341_DrawText(BufferText, FONT4, 10, 10, WHITE, BLACK);
-//		//osDelay(100);
-//	}
-//	 ILI9341_DrawText("COUNT FINISHED!", FONT4, 10, 30, WHITE, BLACK);
-//	osDelay(10000);
   /* USER CODE END LCD_Task */
 }
 
